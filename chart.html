@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chart</title>
+        <!--<link href="skeleton.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+        <link href="styles.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+        <link href='https://fonts.googleapis.com/css?family=Quattrocento:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Muli:400,700' rel='stylesheet' type='text/css'>-->
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript">
+        	$( document ).ready(function() {
+        		$.get( "http://localhost", function( data ) {
+        			data = JSON.parse(data);
+        			var fdata = {};
+  					for (var i = data.length - 1; i >= 0; i--) {
+  						if (fdata[data[i][0].substring(0, 13)]) {
+  							if (fdata[data[i][0].substring(0, 13)][data[i][1]]) {
+  								num = fdata[data[i][0].substring(0, 13)][data[i][1]] + 1;
+  								fdata[data[i][0].substring(0, 13)][data[i][1]] = num;
+  							} else {
+  								fdata[data[i][0].substring(0, 13)][data[i][1]] = 1;
+  							}
+  						} else {
+  							fdata[data[i][0].substring(0, 13)] = {};
+  							fdata[data[i][0].substring(0, 13)][data[i][1]] = 1;
+  						}
+  					}
+  					console.log(fdata);
+				});
+        	})
+        </script>
+	</head>
+	<body id="body">
+		
+	</body>
+</html>
