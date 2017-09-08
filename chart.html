@@ -26,10 +26,7 @@
 					for (var i = 0; i < data.length; i++) {
 						var time = data[i][0].substring(0, 13) + ":00";
 						if (fdata[time]) {
-							//if (fdata[data[i][0].substring(0, 13) + ":00"][data[i][1]]) {
-								fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
-								//fdata[time][data[i][1]] = num;
-							//}
+							fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
 						} else {
 							fdata[time] = {};
 							for (var j = games.length - 1; j >= 0; j--) {
@@ -75,7 +72,7 @@
 
 					var color = ['rgba(203, 67, 53, 0.5)', 'rgba(218, 247, 166, 0.5)', 'rgba(255, 195, 0, 0.5)', 'rgba(255, 87, 51, 0.5)', 'rgba(199, 0, 57, 0.5)', 'rgba(144, 12, 63, 0.5)']
 					for (var k = 0; k < games.length; k++) {
-						datasets.push({backgroundColor: color[k], data: cdata[k]});
+						datasets.push({backgroundColor: color[k], label: games[k], data: cdata[k]});
 					}
 
 					console.log(datasets[0].data[0]);
