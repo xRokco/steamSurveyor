@@ -19,7 +19,7 @@
 		<script type="text/javascript">
 			$( document ).ready(function() {
 				
-				$.get( "http://localhost", function( totaldata ) {
+				$.get( "data", function( totaldata ) {
 					data = JSON.parse(totaldata.split("###")[0]);
 					games = JSON.parse(totaldata.split("###")[1]);
 					var fdata = {};

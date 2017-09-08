@@ -6,7 +6,7 @@ import json
 
 class StringGenerator(object):
     @cherrypy.expose
-    def index(self):
+    def data(self):
         conn = sqlite3.connect('steam.db')
         c = conn.cursor()
         c.execute("SELECT * FROM games")
@@ -16,7 +16,7 @@ class StringGenerator(object):
         return json_string
 
     @cherrypy.expose
-    def chart(self):
+    def index(self):
         return open("chart.html")
 
 if __name__ == '__main__':
