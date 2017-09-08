@@ -11,6 +11,8 @@ class StringGenerator(object):
         c = conn.cursor()
         c.execute("SELECT * FROM games")
         json_string = json.dumps(c.fetchall())
+        c.execute("SELECT * FROM gamelist")
+        json_string += "###"+json.dumps(c.fetchall())
         return json_string
 
     @cherrypy.expose
