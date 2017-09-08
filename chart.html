@@ -19,7 +19,7 @@
 		<script type="text/javascript">
 			$( document ).ready(function() {
 				load();
-				setInterval(function(){ load() }, 3000);
+				setInterval(function(){ load(); }, 3000);
 			});
 				
 			function load(){
@@ -89,6 +89,9 @@
 							datasets: datasets
 						},
 						options: {
+							animation: {
+								duration: 0, // general animation time
+							},
 							scales: {
 								xAxes: [{
 									scaleLabel: {
