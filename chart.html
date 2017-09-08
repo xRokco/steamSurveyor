@@ -18,7 +18,11 @@
 		</style>
 		<script type="text/javascript">
 			$( document ).ready(function() {
+				load();
+				setInterval(function(){ load() }, 3000);
+			});
 				
+			function load(){
 				$.get( "data", function( totaldata ) {
 					data = JSON.parse(totaldata.split("###")[0]);
 					games = JSON.parse(totaldata.split("###")[1]);
@@ -113,7 +117,7 @@
 					var ctx = document.getElementById("canvas").getContext("2d");
 					window.myLine = new Chart(ctx, config);
 				});
-			});
+			}
 		</script>
 	</head>
 	<body id="body">
