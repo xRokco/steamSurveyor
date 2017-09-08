@@ -2,53 +2,53 @@
 <html>
 	<head>
 		<title>Chart</title>
-        <!--<link href="skeleton.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-        <link href="styles.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-        <link href='https://fonts.googleapis.com/css?family=Quattrocento:400,700' rel='stylesheet' type='text/css'>
-        <link href='https://fonts.googleapis.com/css?family=Muli:400,700' rel='stylesheet' type='text/css'>-->
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
-        <style>
-		    canvas {
-		        -moz-user-select: none;
-		        -webkit-user-select: none;
-		        -ms-user-select: none;
-		    }
+		<!--<link href="skeleton.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+		<link href="styles.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+		<link href='https://fonts.googleapis.com/css?family=Quattrocento:400,700' rel='stylesheet' type='text/css'>
+		<link href='https://fonts.googleapis.com/css?family=Muli:400,700' rel='stylesheet' type='text/css'>-->
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+		<style>
+			canvas {
+				-moz-user-select: none;
+				-webkit-user-select: none;
+				-ms-user-select: none;
+			}
 		</style>
-        <script type="text/javascript">
-        	$( document ).ready(function() {
-        		
-        		$.get( "http://localhost", function( totaldata ) {
-        			data = JSON.parse(totaldata.split("###")[0]);
-        			games = JSON.parse(totaldata.split("###")[1]);
-        			var fdata = {};
-  					for (var i = 0; i < data.length; i++) {
-  						var time = data[i][0].substring(0, 13) + ":00";
-  						if (fdata[time]) {
-  							//if (fdata[data[i][0].substring(0, 13) + ":00"][data[i][1]]) {
-  								fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
-  								//fdata[time][data[i][1]] = num;
-  							//}
-  						} else {
-  							fdata[time] = {};
-  							for (var j = games.length - 1; j >= 0; j--) {
+		<script type="text/javascript">
+			$( document ).ready(function() {
+				
+				$.get( "http://localhost", function( totaldata ) {
+					data = JSON.parse(totaldata.split("###")[0]);
+					games = JSON.parse(totaldata.split("###")[1]);
+					var fdata = {};
+					for (var i = 0; i < data.length; i++) {
+						var time = data[i][0].substring(0, 13) + ":00";
+						if (fdata[time]) {
+							//if (fdata[data[i][0].substring(0, 13) + ":00"][data[i][1]]) {
+								fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
+								//fdata[time][data[i][1]] = num;
+							//}
+						} else {
+							fdata[time] = {};
+							for (var j = games.length - 1; j >= 0; j--) {
 								fdata[time][games[j]] = 0;
 							}
 							fdata[time][data[i][1]] = 1;
-  						}
-  					}
+						}
+					}
 
-  					//console.log(Object.keys(fdata));
-  					var timeFormat = 'DD/MM/YYYY HH:mm';
-  					var labels = [];
-  					for (var i = 0; i < Object.keys(fdata).length; i++) {
-  						labels[i] = moment(Object.keys(fdata)[i]).format(timeFormat);
-  					}
+					//console.log(Object.keys(fdata));
+					var timeFormat = 'DD/MM/YYYY HH:mm';
+					var labels = [];
+					for (var i = 0; i < Object.keys(fdata).length; i++) {
+						labels[i] = moment(Object.keys(fdata)[i]).format(timeFormat);
+					}
 
-  					console.log(fdata);
+					console.log(fdata);
 
-  					
+					
 		
 					function newDate(days) {
 						return moment().add(days, 'd').toDate();
@@ -63,45 +63,48 @@
 					}
 
 					var cdata = [];
-					for(var key in fdata) {
-						cdata.push(fdata.offline)
+					var datasets = [];
+					for (var k = 0; k < games.length; k++) {
+						cdata[k] = [];
 					}
+					for(var key in fdata) {
+						for (var l = 0; l < games.length; l++) {
+							cdata[l].push(fdata[key][games[l]]);
+						}
+					}
+
+					var color = ['rgba(203, 67, 53, 0.5)', 'rgba(218, 247, 166, 0.5)', 'rgba(255, 195, 0, 0.5)', 'rgba(255, 87, 51, 0.5)', 'rgba(199, 0, 57, 0.5)', 'rgba(144, 12, 63, 0.5)']
+					for (var k = 0; k < games.length; k++) {
+						datasets.push({backgroundColor: color[k], data: cdata[k]});
+					}
+
+					console.log(datasets[0].data[0]);
 
 					var color = Chart.helpers.color;
 					var config = {
 						type: 'line',
 						data: {
 							labels: labels,
-							datasets: [{
-								//label: Object.keys(fdata[Object.keys(fdata)[0]])[0],
-								backgroundColor: 'rgb(255, 99, 132)',
-								borderColor: 'rgb(255, 99, 132)',
-								//fill: false,
-								data: [
-									1,
-									2,
-									3
-								],
-							}]
+							datasets: datasets
 						},
 						options: {
-					        scales: {
-					            xAxes: [{
-					            	type: "time",
-					                time: {
-					                	//format: timeFormat,
-					                    unit: 'hour'
-					                }
-					            }]
-					        }
-					    }
+							scales: {
+								xAxes: [{
+									type: "time",
+									time: {
+										format: timeFormat,
+										unit: 'hour'
+									}
+								}]
+							}
+						}
 					};
 
 					var ctx = document.getElementById("canvas").getContext("2d");
 					window.myLine = new Chart(ctx, config);
 				});
-        	});
-        </script>
+			});
+		</script>
 	</head>
 	<body id="body">
 		<div style="width:75%;">
