@@ -2,10 +2,6 @@
 <html>
 	<head>
 		<title>Chart</title>
-		<!--<link href="skeleton.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-		<link href="styles.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-		<link href='https://fonts.googleapis.com/css?family=Quattrocento:400,700' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=Muli:400,700' rel='stylesheet' type='text/css'>-->
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
@@ -119,6 +115,7 @@
 
 					var ctx = document.getElementById("canvas").getContext("2d");
 					window.myLine = new Chart(ctx, config);
+					chart.update();
 				});
 			}
 		</script>
