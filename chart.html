@@ -3,6 +3,7 @@
 	<head>
 		<title>Chart</title>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="static/sql.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
 		<style>
@@ -13,70 +14,81 @@
 			}
 		</style>
 		<script type="text/javascript">
+			var times = {};
 			$( document ).ready(function() {
+				times = { min: moment().subtract(7,'d').format("YYYY-MM-DD HH:mm.SSSSSS"), max: "now" }
 				load();
 				setInterval(function(){ load(); }, 50000);
 			});
-				
+			
 			function load(){
-				$.get( "data", function( totaldata ) {
-					data = JSON.parse(totaldata.split("###")[0]);
-					games = JSON.parse(totaldata.split("###")[1]);
-					var fdata = {};
-					for (var i = 0; i < data.length; i++) {
-						var time = data[i][0].substring(0, 13) + ":00";
-						if (fdata[time]) {
-							fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
-						} else {
-							fdata[time] = {};
-							for (var j = games.length - 1; j >= 0; j--) {
-								fdata[time][games[j]] = 0;
-							}
-							fdata[time][data[i][1]] = 1;
-						}
+				var sql = window.SQL
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', 'static/steam.db', true);
+				xhr.responseType = 'arraybuffer';
+				xhr.onload = function(e) {
+					var uInt8Array = new Uint8Array(this.response);
+					var db = new SQL.Database(uInt8Array);
+					if(times.max == "now"){
+						var data = db.exec("SELECT * FROM games WHERE time > '" + times.min + "' AND time < '" + moment().format("YYYY-MM-DD HH:mm.SSSSSS") + "'");
+						var games = db.exec("SELECT DISTINCT game FROM games WHERE time > '" + times.min + "' AND time < '" + moment().format("YYYY-MM-DD HH:mm.SSSSSS") + "'");
+					} else {
+						var data = db.exec("SELECT * FROM games WHERE time > '" + times.min + "' AND time < '" + times.max + "'");
+						var games = db.exec("SELECT DISTINCT game FROM games WHERE time > '" + times.min + "' AND time < '" + times.max + "'");
 					}
-
-					//console.log(Object.keys(fdata));
-					var timeFormat = 'DD/MM/YYYY HH:mm';
-					var labels = [];
-					for (var i = 0; i < Object.keys(fdata).length; i++) {
-						labels[i] = moment(Object.keys(fdata)[i]).format(timeFormat);
-					}
-
-					console.log(fdata);
-
 					
-		
-					function newDate(days) {
-						return moment().add(days, 'd').toDate();
-					}
+					graph(data[0].values, games[0].values);
+				};
+				xhr.send();
+			}
 
-					function newDateString(days) {
-						return moment().add(days, 'd').format(timeFormat);
-					}
-
-					function newTimestamp(days) {
-						return moment().add(days, 'd').unix();
-					}
-
-					var cdata = [];
-					var datasets = [];
-					for (var k = 0; k < games.length; k++) {
-						cdata[k] = [];
-					}
-					for(var key in fdata) {
-						for (var l = 0; l < games.length; l++) {
-							cdata[l].push(fdata[key][games[l]]);
+			function graph(data, games) {
+				var fdata = {};
+				for (var i = 0; i < data.length; i++) {
+					var time = data[i][0].substring(0, 13) + ":00";
+					if (fdata[time]) {
+						fdata[time][data[i][1]] = fdata[time][data[i][1]] + 1;
+					} else {
+						fdata[time] = {};
+						for (var j = games.length - 1; j >= 0; j--) {
+							fdata[time][games[j]] = 0;
 						}
+						fdata[time][data[i][1]] = 1;
 					}
+				}
 
-					var color = ['rgba(203, 67, 53, 0.5)', 'rgba(218, 247, 166, 0.5)', 'rgba(255, 195, 0, 0.5)', 'rgba(255, 87, 51, 0.5)', 'rgba(199, 0, 57, 0.5)', 'rgba(144, 12, 63, 0.5)']
-					for (var k = 0; k < games.length; k++) {
-						datasets.push({backgroundColor: color[k], borderColor: color[k], fill: false,label: games[k], data: cdata[k]});
+				var timeFormat = 'DD/MM/YYYY HH:mm';
+				var labels = [];
+				for (var i = 0; i < Object.keys(fdata).length; i++) {
+					labels[i] = moment(Object.keys(fdata)[i]).format(timeFormat);
+				}
+
+				var cdata = [];
+				var datasets = [];
+				for (var k = 0; k < games.length; k++) {
+					cdata[k] = [];
+				}
+				for(var key in fdata) {
+					for (var l = 0; l < games.length; l++) {
+						cdata[l].push(fdata[key][games[l]]);
 					}
+				}
 
-					//console.log(datasets[0].data[0]);
+				var color = ['rgba(203, 67, 53, 0.5)', 'rgba(218, 247, 166, 0.5)', 'rgba(255, 195, 0, 0.5)', 'rgba(255, 87, 51, 0.5)', 'rgba(199, 0, 57, 0.5)', 'rgba(144, 12, 63, 0.5)']
+				for (var k = 0; k < games.length; k++) {
+					datasets.push({backgroundColor: color[k], borderColor: color[k], fill: false,label: games[k], data: cdata[k]});
+				}
 
+				var ctx = document.getElementById("canvas").getContext("2d");
+
+				if(window.myLine){
+					console.log("update");
+					window.myLine.config.data.datasets = datasets;
+					window.myLine.config.data.labels = labels;
+					window.myLine.update();
+				} else {
+					console.log("new");
 					var color = Chart.helpers.color;
 					var config = {
 						type: 'line',
@@ -96,7 +108,9 @@
 									},
 									type: "time",
 									time: {
-										unit: 'hour'
+										unit: 'hour',
+										format: timeFormat,
+										tooltipFormat: 'll'
 									}
 								}],
 								yAxes: [{
@@ -113,16 +127,53 @@
 						}
 					};
 
-					var ctx = document.getElementById("canvas").getContext("2d");
 					window.myLine = new Chart(ctx, config);
-					chart.update();
-				});
+					//console.log(window.myLine.config.data.datasets);
+				}
+			}
+
+			function modify() {
+				//console.log(document.getElementById("number").value);
+				//console.log(document.getElementById("detail").value);
+				if(document.getElementById("number").value != ""){
+					times = { min: moment().subtract(document.getElementById("number").value, document.getElementById("detail").value).format("YYYY-MM-DD HH:mm.SSSSSS"), max: "now" }
+					load();
+				}
+			}
+
+			function custom() {
+				if(document.getElementById("min").value != "" && document.getElementById("max").value != ""){
+					if(document.getElementById("max").value.toLowerCase() == "now"){
+						times = { min: moment(document.getElementById("min").value).format("YYYY-MM-DD HH:mm.SSSSSS"), max: "now" }
+					} else {
+						times = { min: moment(document.getElementById("min").value).format("YYYY-MM-DD HH:mm.SSSSSS"), max: moment(document.getElementById("max").value).format("YYYY-MM-DD HH:mm.SSSSSS") }
+					}
+					load();
+				}
 			}
 		</script>
 	</head>
 	<body id="body">
 		<div style="width:75%;">
 			<canvas id="canvas"></canvas>
+		</div>
+		<div>
+			<span>Show data for the last</span>
+			<input id="number" type="number" name="number" style="width: 40px">
+			<select id="detail">
+				<option value="h">Hours</option>
+				<option value="d">Days</option>
+				<option value="w">Weeks</option>
+			</select>
+			<button onclick="modify()">Submit</button>
+		</div>
+		<div>
+			<span>Show data between dates </span>
+			<input id="min" type="text" name="min" placeholder="YYYY-MM-DD HH:mm.SSSSSS" style="width: 200px">
+			<span> and </span>
+			<input id="max" type="text" name="max" placeholder="YYYY-MM-DD HH:mm.SSSSSS" style="width: 200px">
+			<button onclick="custom()">Submit</button>
+			<span>Put "now" into the right hand field for the current date and time</span>
 		</div>
 	</body>
 </html>

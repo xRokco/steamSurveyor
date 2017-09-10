@@ -2,12 +2,20 @@ import string
 import sqlite3
 import cherrypy
 import json
+import os, os.path
+import time
 
+import urllib.parse
+import urllib.request
+from bs4 import BeautifulSoup
+import sys
+from datetime import datetime
+from cherrypy.process.plugins import BackgroundTask
 
 class StringGenerator(object):
     @cherrypy.expose
     def data(self):
-        conn = sqlite3.connect('steam.db')
+        conn = sqlite3.connect('public/steam.db')
         c = conn.cursor()
         c.execute("SELECT * FROM games")
         json_string = json.dumps(c.fetchall())
@@ -19,7 +27,56 @@ class StringGenerator(object):
     def index(self):
         return open("chart.html")
 
+    def _task(self):
+        conn = sqlite3.connect('public/steam.db')
+        c = conn.cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS games (time text, game text)")
+        #c.execute("CREATE TABLE IF NOT EXISTS gamelist (game text, UNIQUE(game))")
+
+        url = 'http://steamcommunity.com/id/Rokco'
+
+        req = urllib.request.Request(url)
+
+        print("updating")
+        try:
+            response = urllib.request.urlopen(req)
+        except urllib.error.HTTPError as e:
+            sys.exit(str(e))
+
+        html = response.read()
+
+        parsed_html = BeautifulSoup(html, "html.parser")
+
+        date = str(datetime.now())
+        try:
+            game = parsed_html.body.find('div', attrs={'class':'profile_in_game_name'}).text
+            if game.startswith('Last Online'):
+                #offline
+                game = "offline"
+        except AttributeError:
+            #online, no game
+            game = "online"
+
+        c.execute("INSERT INTO games VALUES ('"+date+"','"+game+"')")
+        c.execute("INSERT OR IGNORE INTO gamelist VALUES ('"+game+"')")
+
+        conn.commit()
+
+        conn.close()
+
 if __name__ == '__main__':
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.server.socket_port = 80
-    cherrypy.quickstart(StringGenerator())
+    conf = {
+        '/': {
+            'tools.staticdir.root': os.path.abspath(os.getcwd())
+        },
+        '/static': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': './public'
+        }
+    }
+
+    StringGenerator()._task()
+    BackgroundTask(59, StringGenerator()._task, bus = cherrypy.engine).start()
+    cherrypy.quickstart(StringGenerator(), '/', conf)
