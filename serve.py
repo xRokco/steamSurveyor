@@ -4,10 +4,7 @@ import cherrypy
 import json
 import os, os.path
 import time
-
-import urllib.parse
-import urllib.request
-from bs4 import BeautifulSoup
+import requests
 import sys
 from datetime import datetime
 from cherrypy.process.plugins import BackgroundTask
@@ -32,34 +29,36 @@ class StringGenerator(object):
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS games (time text, game text)")
 
-        url = 'http://steamcommunity.com/id/Rokco'
+        url = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=58DD6DFA4A77663D10F94D79E7AC6F4F&steamids=76561198024504284'
 
-        req = urllib.request.Request(url)
+        resp = requests.get(url=url)
+        data = json.loads(resp.text)
 
         print("updating")
-        try:
-            response = urllib.request.urlopen(req)
-        except urllib.error.HTTPError as e:
-            sys.exit(str(e))
-
-        html = response.read()
-
-        parsed_html = BeautifulSoup(html, "html.parser")
 
         date = str(datetime.now())
         try:
-            game = parsed_html.body.find('div', attrs={'class':'profile_in_game_name'}).text
-            if game.startswith('Last Online'):
-                #offline
-                game = "offline"
-        except AttributeError:
-            #online, no game
-            game = "online"
+            # in game
+            game = resp.json()['response']['players'][0]['gameextrainfo']
+        except KeyError:
+            #not in game
+            if resp.json()['response']['players'][0]['personastateflags'] == 0:
+                game = "Offline"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 1:
+                game = "Online"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 2:
+                game = "Busy"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 3:
+                game = "Away"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 4:
+                game = "Snooze"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 5:
+                game = "looking to trade"
+            elif resp.json()['response']['players'][0]['personastateflags'] == 6:
+                game = "looking to play"        
 
         c.execute("INSERT INTO games VALUES ('"+date+"','"+game+"')")
-
         conn.commit()
-
         conn.close()
 
 if __name__ == '__main__':
