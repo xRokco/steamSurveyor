@@ -67,6 +67,8 @@ class StringGenerator(object):
 if __name__ == '__main__':
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.server.socket_port = 80
+    if len(sys.argv) > 1:
+        cherrypy.server.socket_port = int(sys.argv[1])
     conf = {
         '/': {
             'tools.staticdir.root': os.path.abspath(os.getcwd())

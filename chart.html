@@ -135,7 +135,7 @@
 			function modify() {
 				//console.log(document.getElementById("number").value);
 				//console.log(document.getElementById("detail").value);
-				if(document.getElementById("number").value != ""){
+				if(document.getElementById("number").value != "" && document.getElementById("number").value > 1){
 					times = { min: moment().subtract(document.getElementById("number").value, document.getElementById("detail").value).format("YYYY-MM-DD HH:mm.SSSSSS"), max: "now" }
 					load();
 				}
@@ -159,7 +159,7 @@
 		</div>
 		<div>
 			<span>Show data for the last</span>
-			<input id="number" type="number" name="number" style="width: 40px">
+			<input id="number" type="number" name="number" min="1" style="width: 40px">
 			<select id="detail">
 				<option value="h">Hours</option>
 				<option value="d">Days</option>
@@ -169,9 +169,9 @@
 		</div>
 		<div>
 			<span>Show data between dates </span>
-			<input id="min" type="text" name="min" placeholder="YYYY-MM-DD HH:mm.SSSSSS" style="width: 200px">
+			<input id="min" type="text" name="min" placeholder="YYYY-MM-DD HH:mm" style="width: 200px">
 			<span> and </span>
-			<input id="max" type="text" name="max" placeholder="YYYY-MM-DD HH:mm.SSSSSS" style="width: 200px">
+			<input id="max" type="text" name="max" placeholder="YYYY-MM-DD HH:mm" style="width: 200px">
 			<button onclick="custom()">Submit</button>
 			<span>Put "now" into the right hand field for the current date and time</span>
 		</div>
