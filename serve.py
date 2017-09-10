@@ -31,7 +31,6 @@ class StringGenerator(object):
         conn = sqlite3.connect('public/steam.db')
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS games (time text, game text)")
-        #c.execute("CREATE TABLE IF NOT EXISTS gamelist (game text, UNIQUE(game))")
 
         url = 'http://steamcommunity.com/id/Rokco'
 
@@ -58,7 +57,6 @@ class StringGenerator(object):
             game = "online"
 
         c.execute("INSERT INTO games VALUES ('"+date+"','"+game+"')")
-        c.execute("INSERT OR IGNORE INTO gamelist VALUES ('"+game+"')")
 
         conn.commit()
 
