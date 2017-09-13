@@ -47,7 +47,7 @@ class StringGenerator(object):
             elif resp.json()['response']['players'][0]['personastate'] == 1 or resp.json()['response']['players'][0]['personastate'] == 5 or resp.json()['response']['players'][0]['personastate'] == 6:
                 game = "Online"       
 
-        c.execute("UPDATE games set game = REPLACE(game,'Away','Offline') WHERE game LIKE 'Away'")
+        c.execute("UPDATE games SET game = replace(game,'Away','Offline') WHERE game LIKE 'Away%'")
         c.execute("INSERT INTO games VALUES ('"+date+"','"+game+"')")
         conn.commit()
         conn.close()
