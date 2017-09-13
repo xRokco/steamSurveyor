@@ -42,9 +42,9 @@ class StringGenerator(object):
             game = resp.json()['response']['players'][0]['gameextrainfo']
         except KeyError:
             #not in game
-            if resp.json()['response']['players'][0]['personastate'] == 0 OR resp.json()['response']['players'][0]['personastate'] == 2 OR resp.json()['response']['players'][0]['personastate'] == 3 OR resp.json()['response']['players'][0]['personastate'] == 4:
+            if resp.json()['response']['players'][0]['personastate'] == 0 or resp.json()['response']['players'][0]['personastate'] == 2 or resp.json()['response']['players'][0]['personastate'] == 3 or resp.json()['response']['players'][0]['personastate'] == 4:
                 game = "Offline"
-            elif resp.json()['response']['players'][0]['personastate'] == 1 OR resp.json()['response']['players'][0]['personastate'] == 5 OR resp.json()['response']['players'][0]['personastate'] == 6:
+            elif resp.json()['response']['players'][0]['personastate'] == 1 or resp.json()['response']['players'][0]['personastate'] == 5 or resp.json()['response']['players'][0]['personastate'] == 6:
                 game = "Online"       
 
         c.execute("SELECT REPLACE('Away','Away','Offline')")
